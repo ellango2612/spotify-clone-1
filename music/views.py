@@ -3,17 +3,19 @@ from django.http import HttpResponse
 from django.contrib import messages
 from django.contrib.auth.models import User, auth
 from django.contrib.auth.decorators import login_required
-import requests
+
 from bs4 import BeautifulSoup as bs
 import re
+import requests
 
 # Create your views here.
 def top_artists():
+
     url = "https://spotify-scraper.p.rapidapi.com/v1/chart/artists/top"
 
     headers = {
-        "X-RapidAPI-Key": "02912db996msh068b089c778126bp13a9d9jsn380afeb7d573",
-        "X-RapidAPI-Host": "spotify-scraper.p.rapidapi.com"
+        "x-rapidapi-key": "9815fb2117msh30e73d59417d42cp174702jsn2ab461ceb936",
+        "x-rapidapi-host": "spotify-scraper.p.rapidapi.com"
     }
 
     response = requests.get(url, headers=headers)
@@ -35,8 +37,8 @@ def top_tracks():
     url = "https://spotify-scraper.p.rapidapi.com/v1/chart/tracks/top"
 
     headers = {
-        "X-RapidAPI-Key": "02912db996msh068b089c778126bp13a9d9jsn380afeb7d573",
-        "X-RapidAPI-Host": "spotify-scraper.p.rapidapi.com"
+	    "x-rapidapi-key": "9815fb2117msh30e73d59417d42cp174702jsn2ab461ceb936",
+	    "x-rapidapi-host": "spotify-scraper.p.rapidapi.com"
     }
 
     response = requests.get(url, headers=headers)
@@ -47,7 +49,7 @@ def top_tracks():
     if 'tracks' in data:
         shortened_data = data['tracks'][:18]
 
-        # id, name, artist, cover url 
+        # id, name, artist, cover url
         for track in shortened_data:
             track_id = track['id']
             track_name = track['name']
@@ -62,18 +64,18 @@ def top_tracks():
             })
 
     else:
-        print("track not foun in response")
+        print("track not found in response")
 
     return track_details
 
-def get_audio_etails(query):
+def get_audio_details(query):
     url = "https://spotify-scraper.p.rapidapi.com/v1/track/download"
 
-    querystring = {"track": query}
+    querystring = {"track":"Lego House Ed Sheeran"}
 
     headers = {
-        "X-RapidAPI-Key": "02912db996msh068b089c778126bp13a9d9jsn380afeb7d573",
-        "X-RapidAPI-Host": "spotify-scraper.p.rapidapi.com"
+        "x-rapidapi-key": "9815fb2117msh30e73d59417d42cp174702jsn2ab461ceb936",
+        "x-rapidapi-host": "spotify-scraper.p.rapidapi.com"
     }
 
     response = requests.get(url, headers=headers, params=querystring)
@@ -127,15 +129,15 @@ def music(request, pk):
     querystring = {"trackId": track_id}
 
     headers = {
-        "X-RapidAPI-Key": "02912db996msh068b089c778126bp13a9d9jsn380afeb7d573",
-        "X-RapidAPI-Host": "spotify-scraper.p.rapidapi.com"
+        "x-rapidapi-key": "9815fb2117msh30e73d59417d42cp174702jsn2ab461ceb936",
+        "x-rapidapi-host": "spotify-scraper.p.rapidapi.com"
     }
 
     response = requests.get(url, headers=headers, params=querystring)
 
     if response.status_code == 200:
         data = response.json()
-        # extrack track_name, artist_name
+        # extract track_name, artist_name
 
         track_name = data.get("name")
         artists_list = data.get("artists", [])
@@ -186,8 +188,8 @@ def search(request):
         querystring = {"term":search_query,"type":"track"}
 
         headers = {
-            "X-RapidAPI-Key": "02912db996msh068b089c778126bp13a9d9jsn380afeb7d573",
-            "X-RapidAPI-Host": "spotify-scraper.p.rapidapi.com"
+            "x-rapidapi-key": "9815fb2117msh30e73d59417d42cp174702jsn2ab461ceb936",
+            "x-rapidapi-host": "spotify-scraper.p.rapidapi.com"
         }
 
         response = requests.get(url, headers=headers, params=querystring)
@@ -235,8 +237,8 @@ def profile(request, pk):
     querystring = {"artistId": artist_id}
 
     headers = {
-        "X-RapidAPI-Key": "02912db996msh068b089c778126bp13a9d9jsn380afeb7d573",
-        "X-RapidAPI-Host": "spotify-scraper.p.rapidapi.com"
+        "x-rapidapi-key": "9815fb2117msh30e73d59417d42cp174702jsn2ab461ceb936",
+        "x-rapidapi-host": "spotify-scraper.p.rapidapi.com"
     }
 
     response = requests.get(url, headers=headers, params=querystring)
@@ -290,9 +292,9 @@ def login(request):
             auth.login(request, user)
             return redirect('/')
         else:
-            messages.info(request, 'Credentials Invalid')
+            messages.info(request, 'Credentials Invalid') # name and password dont match
             return redirect('login')
-        
+
     return render(request, 'login.html')
 
 def signup(request):
@@ -303,7 +305,7 @@ def signup(request):
         password2 = request.POST['password2']
 
         if password == password2:
-            if User.objects.filter(email=email).exists():
+            if User.objects.filter(email=email).exists(): #if email already existed
                 messages.info(request, 'Email Taken')
                 return redirect('signup')
             elif User.objects.filter(username=username).exists():
@@ -313,14 +315,14 @@ def signup(request):
                 user = User.objects.create_user(username=username, email=email, password=password)
                 user.save()
 
-                # log user in 
+                # log user in
                 user_login = auth.authenticate(username=username, password=password)
                 auth.login(request, user_login)
                 return redirect('/')
         else:
             messages.info(request, 'Password Not Matching')
             return redirect('signup')
-    else:    
+    else:
         return render(request, 'signup.html')
 
 @login_required(login_url='login')

@@ -82,6 +82,7 @@ WSGI_APPLICATION = 'spotify_clone.wsgi.application'
 #     }
 # }
 
+###
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
